@@ -6,7 +6,10 @@ import os
 import sqlite3
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'smartrain_history.db')
+if os.environ.get('VERCEL'):
+    DB_PATH = '/tmp/smartrain_history.db'
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'smartrain_history.db')
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
