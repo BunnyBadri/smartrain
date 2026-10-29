@@ -1,85 +1,84 @@
-# SmartRain: Intelligent Rainfall Prediction & Risk Assessment
+# SmartRain: Autonomous Meteorological Intelligence & Decision-Support Workstation
 
-A software-based decision-support system integrating **Artificial Neural Networks (ANN)** and **Fuzzy Logic (Mamdani Inference)** for meteorological forecasting and risk categorization.
+A production-grade, software-based decision-support system integrating an **Artificial Neural Network (ANN)** for rainfall regression and an interpretable **Fuzzy Logic (Mamdani Inference)** engine for operational risk categorization.
 
-Developed in accordance with the Soft Computing Course / Review II & Final Review academic guidelines.
-
----
-
-## 🌟 Key Features
-
-1. **Artificial Neural Network (ANN) Regressor**:
-   * Multi-Layer Perceptron (MLP) trained on 3,000 meteorological observation records.
-   * Inputs: *Temperature*, *Relative Humidity*, *Atmospheric Pressure*, *Wind Speed*, and *Prior 24h Rainfall*.
-   * Output: Numerical Rainfall Prediction in millimeters ($mm$).
-   * Performance: Achieves an **$R^2$ score of 0.7651** and reduces MAE by **61.3%** compared to historical-average baseline.
-
-2. **Interpretable Fuzzy Logic Risk Layer**:
-   * Mamdani Fuzzy Inference System evaluating rainfall volume and atmospheric factors.
-   * Converts numerical forecasts into human-understandable risk levels: **Low**, **Moderate**, **High**, **Very High**.
-   * Transparent rule trace displaying active linguistic rules and degree of membership ($\alpha$).
-
-3. **Interactive Web Application (Dashboard)**:
-   * Modern, responsive interface with real-time synchronized range sliders and presets (*Monsoon Cloudburst*, *Dry Sunny Day*, *Pre-Monsoon Squall*, *Overcast Showers*).
-   * Visual gauge meter and dynamic color-coded alert badges.
-   * Actionable operational advisories for agricultural and municipal planning.
-   * Persistent SQLite simulation audit log with CSV export capability.
+Trained on **7,671 authentic real-world meteorological observations** and powered by **automated geospatial live satellite ingestion**.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Key Capabilities
 
-* **Backend & ML**: Python 3.14+, Flask 3.1, Scikit-learn, NumPy, Pandas, Joblib
-* **Soft Computing Engine**: Custom Mamdani Fuzzy Inference System & Multi-Layer Perceptron
-* **Storage**: SQLite3
-* **Frontend**: HTML5, CSS3 (Modern Glassmorphic Dark UI), Vanilla JavaScript (ES6+)
+1. **Autonomous Geospatial Ingestion (No Manual Inputs Required)**:
+   * Uses device GPS (HTML5 Geolocation API) to pinpoint the user's location.
+   * Ingests real-time atmospheric readings from the **Open-Meteo Global Satellite & Radar API** (backed by DWD, ECMWF, and NOAA).
+   * Automatically extracts Dry-Bulb Temperature, Relative Humidity, Barometric Pressure, 10m Wind Velocity, and Past 24h Precipitation.
+   * Includes a worldwide city search bar to monitor any weather station globally.
 
----
+2. **Authentic Real-World Training Dataset (ECMWF ERA5 Archive)**:
+   * **7,671 real-world daily observation records** collected across 7 full years (2018–2024).
+   * Spans three diverse meteorological zones:
+     * **Mumbai Coastal Station**: Coastal Southwest Monsoon (heavy inundation & squalls, max rain: 199.9 mm).
+     * **Bengaluru Plateau Station**: Southern Deccan Plateau (convective thunderstorms & moderate showers, max rain: 69.6 mm).
+     * **Delhi Subtropical Station**: Northern Subtropical Monsoon (high thermal gradient, max rain: 122.7 mm).
 
-## 🚀 Quick Start Guide
+3. **Artificial Neural Network (ANN) Regressor**:
+   * Multi-Layer Perceptron (MLP) architecture with 3 hidden layers `[64 -> 32 -> 16]` and ReLU activations.
+   * Achieves **$MAE = 2.626\text{ mm}$** (vs. Baseline Dummy $5.652\text{ mm}$, a **53.5% error reduction**).
+   * Achieves **$R^2 = 0.5502$** on real-world chaotic meteorological data.
 
-### 1. Prerequisites & Dependencies
-Ensure Python 3.10+ is installed. Install required packages:
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Generate Dataset & Train ANN Model (Optional - Already pre-trained)
-```bash
-python data/generate_data.py
-python models/ann_model.py
-```
-
-### 3. Run the Web Server
-```bash
-python run.py
-```
-Open your web browser and navigate to:
-```
-http://localhost:5000
-```
-
-### 4. Run Automated Test Suite
-```bash
-python test_app.py
-```
+4. **Explainable Mamdani Fuzzy Inference System (FIS)**:
+   * Converts numerical rainfall forecasts into human-centered risk tiers: **Low**, **Moderate**, **High**, **Critical / Very High**.
+   * Interactive **HTML5 Canvas continuous curves** plotting piecewise triangular & trapezoidal membership functions with dynamic crosshair intersections ($\alpha$-cuts).
+   * **2D Meteorological Risk Matrix** plotting precipitation rate against soil/humidity saturation.
 
 ---
 
 ## 📊 Experimental Evaluation vs Baseline
 
+Evaluated on 7,671 authentic observations with an 80/20 train/test split (6,136 training samples / 1,535 test samples):
+
 | Metric | ANN (Multi-Layer Perceptron) | Historical Baseline | Improvement |
 | :--- | :---: | :---: | :---: |
-| **MAE (Mean Absolute Error)** | **4.682 mm** | 12.107 mm | **-61.32% Error** |
-| **RMSE (Root Mean Sq. Error)** | **6.787 mm** | 14.018 mm | **-51.58% Error** |
-| **$R^2$ Score (Goodness of Fit)** | **0.7651** | -0.0022 | **+0.7673** |
+| **MAE (Mean Absolute Error)** | **2.626 mm** | 5.652 mm | **-53.54% Error** |
+| **RMSE (Root Mean Sq. Error)** | **8.577 mm** | 12.793 mm | **-32.96% Error** |
+| **$R^2$ Score (Goodness of Fit)** | **0.5502** | -0.0007 | **+0.5509** |
 
 ---
 
-## 💡 Soft Computing Justification (For Viva Defense)
+## 🛠️ Tech Stack & Citations
 
-* **Why ANN?**
-  * Meteorological parameters interact in complex, non-linear ways (e.g. pressure drops + humidity spikes). ANNs excel at universal non-linear function approximation from historical records.
-* **Why Fuzzy Logic?**
-  * Machine learning models are numerical "black boxes". Fuzzy logic uses linguistic rules (e.g., *“IF Rain is HEAVY AND Humidity is HIGH THEN Risk is VERY HIGH”*) to provide explainable, human-centered decision support for non-technical stakeholders (farmers, disaster managers).
+* **Backend & ML**: Python 3.14+, Flask 3.1, Scikit-learn, NumPy, Pandas, Joblib
+* **Data Ingestion**: ECMWF ERA5 Reanalysis Archive & Open-Meteo Satellite Feed
+* **Soft Computing Engine**: Custom Mamdani Fuzzy Inference System & Multi-Layer Perceptron
+* **Frontend**: Vanilla JavaScript (ES6+), HTML5 Canvas, SVG Arc Meter, Modern Industrial Dark CSS
+* **Database**: SQLite3 persistence with simulation audit log & CSV export
 
+### References & Citations for Academic Defense
+1. **Abu Saleh, M. et al. (2024)**: *A comprehensive review towards resilient rainfall forecasting models using artificial intelligence techniques.* Green Technologies and Sustainability.
+2. **Ruiz-Hurtado, A.F. et al. (2024)**: *Neural Networks and Fuzzy Logic-Based Approaches for Precipitation Estimation: A Systematic Review.* Ingeniería e Investigación.
+3. **ECMWF (European Centre for Medium-Range Weather Forecasts)**: *ERA5 Global Atmospheric Reanalysis Data (2018–2024).*
+4. **India Meteorological Department (IMD)**: *Monsoon Rainfall & Regional Meteorological Standards.*
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Fetch Real Historical Data & Retrain Model (Optional - Already Pre-trained)
+```bash
+python data/fetch_real_data.py
+python models/ann_model.py
+```
+
+### 3. Run Web Workstation
+```bash
+python run.py
+```
+Open your web browser at:
+```
+http://localhost:5000
+```
