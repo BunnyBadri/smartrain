@@ -30,9 +30,8 @@ TARGET_COLUMN = 'rainfall_amount'
 
 def train_and_evaluate(data_path=DATA_PATH, model_save_path=MODEL_PATH, metrics_save_path=METRICS_PATH):
     if not os.path.exists(data_path):
-        from data.generate_data import generate_historical_weather
-        df = generate_historical_weather(num_samples=3000)
-        df.to_csv(data_path, index=False)
+        from data.fetch_real_data import build_real_historical_dataset
+        df = build_real_historical_dataset()
     else:
         df = pd.read_csv(data_path)
 

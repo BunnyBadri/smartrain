@@ -386,3 +386,4 @@ Based on [Evaluation Criteria.pdf](file:///c:/Users/vmbad/Downloads/Smart%20Weat
 4. **India Meteorological Department (IMD)**. *Observed Rainfall Features during the Southwest Monsoon 2024 & Regional Meteorological Guidelines.* Ministry of Earth Sciences, Government of India.
 5. **Zadeh, L.A. (1965)**. *Fuzzy Sets.* Information and Control, 8(3), 338–353.
 6. **Mamdani, E.H. & Assilian, S. (1975)**. *An experiment in linguistic synthesis with a fuzzy logic controller.* International Journal of Man-Machine Studies, 7(1), 1–13.
+
