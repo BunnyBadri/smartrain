@@ -1,14 +1,17 @@
-// SmartRain Meteorological Intelligence Workstation Engine
+// SmartRain Autonomous Meteorological Intelligence Workstation Engine
 
 const PRESETS = {
-  monsoon: { temp: 24.5, humidity: 92.0, pressure: 994.0, wind: 36.0, prevRain: 58.0 },
-  squall: { temp: 33.5, humidity: 78.0, pressure: 1001.0, wind: 44.0, prevRain: 8.0 },
-  moderate: { temp: 27.0, humidity: 68.0, pressure: 1010.0, wind: 18.0, prevRain: 14.0 },
-  sunny: { temp: 37.5, humidity: 28.0, pressure: 1018.0, wind: 10.0, prevRain: 0.0 }
+  monsoon: { temp: 24.5, humidity: 92.0, pressure: 994.0, wind: 36.0, prevRain: 58.0, name: "Monsoon Depression (Scenario)" },
+  squall: { temp: 33.5, humidity: 78.0, pressure: 1001.0, wind: 44.0, prevRain: 8.0, name: "Pre-Monsoon Convection (Scenario)" },
+  moderate: { temp: 27.0, humidity: 68.0, pressure: 1010.0, wind: 18.0, prevRain: 14.0, name: "Overcast Steady Rain (Scenario)" },
+  sunny: { temp: 37.5, humidity: 28.0, pressure: 1018.0, wind: 10.0, prevRain: 0.0, name: "Anticyclonic Fair Weather (Scenario)" }
 };
 
 let currentPrediction = null;
+let currentLocation = { name: "Detecting location...", lat: null, lon: null };
+let currentMode = 'live'; // 'live' or 'manual'
 let debounceTimer = null;
+let searchDebounce = null;
 
 // Mathematical Membership Formulas
 function trimf(x, [a, b, c]) {
@@ -24,6 +27,35 @@ function trapmf(x, [a, b, c, d]) {
   return d !== c ? (d - x) / (d - c) : 1.0;
 }
 
+// Mode Switching (Live Satellite Stream vs Manual Scenario Simulation)
+function setMode(mode) {
+  currentMode = mode;
+  const liveBtn = document.getElementById('modeLiveBtn');
+  const manualBtn = document.getElementById('modeManualBtn');
+  const cockpitForm = document.getElementById('cockpitForm');
+  const manualBlock = document.getElementById('manualExecuteBlock');
+  const scenarioStrip = document.getElementById('scenarioStrip');
+  const modeTag = document.getElementById('cockpitModeTag');
+  const stationId = document.getElementById('cockpitStationId');
+
+  if (mode === 'live') {
+    liveBtn.classList.add('active');
+    manualBtn.classList.remove('active');
+    cockpitForm.classList.add('mode-live-locked');
+    manualBlock.style.display = 'none';
+    modeTag.textContent = 'AUTOMATED METEOROLOGICAL TELEMETRY';
+    stationId.textContent = 'OPEN-METEO FEED';
+    refreshCurrentLocation();
+  } else {
+    manualBtn.classList.add('active');
+    liveBtn.classList.remove('active');
+    cockpitForm.classList.remove('mode-live-locked');
+    manualBlock.style.display = 'block';
+    modeTag.textContent = 'MANUAL SCENARIO SIMULATION';
+    stationId.textContent = 'USER CONTROLS ACTIVE';
+  }
+}
+
 // Tab Switching
 function switchTab(tabId) {
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -34,69 +66,146 @@ function switchTab(tabId) {
   });
 
   if (tabId === 'tab-fuzzy' && currentPrediction) {
-    setTimeout(renderAllFuzzyCurves, 50);
+    setTimeout(renderAllFuzzyCurves, 60);
   }
 }
 
-// Input Synchronization & Micro-Steppers
-function syncFromSlider(sliderId, numId, decimals = 1) {
-  const val = parseFloat(document.getElementById(sliderId).value);
-  document.getElementById(numId).value = val.toFixed(decimals);
-  triggerStream();
-}
+// Automated Geospatial Location Detection (GPS / Geolocation API)
+function detectUserLocation() {
+  const locNameEl = document.getElementById('currentLocationName');
+  const locCoordsEl = document.getElementById('currentLocationCoords');
+  locNameEl.textContent = "Querying browser GPS coordinates...";
 
-function syncFromNum(sliderId, numId, decimals = 1) {
-  let val = parseFloat(document.getElementById(numId).value);
-  const slider = document.getElementById(sliderId);
-  if (isNaN(val)) val = parseFloat(slider.value);
-  val = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), val));
-  slider.value = val;
-  document.getElementById(numId).value = val.toFixed(decimals);
-  triggerStream();
-}
-
-function stepVal(sliderId, numId, delta, min, max, decimals = 1) {
-  let val = parseFloat(document.getElementById(numId).value) + delta;
-  val = Math.min(max, Math.max(min, val));
-  document.getElementById(sliderId).value = val;
-  document.getElementById(numId).value = val.toFixed(decimals);
-  triggerStream();
-}
-
-function triggerStream() {
-  if (document.getElementById('realtimeToggle').checked) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(runInference, 180);
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        fetchLiveByCoords(lat, lon);
+      },
+      (err) => {
+        console.warn("Geolocation denied or unavailable:", err.message);
+        locNameEl.textContent = "Connecting to regional weather grid...";
+        // Fallback default station
+        fetchLiveByCoords(12.9716, 77.5946, "Bengaluru, India (Regional Grid)");
+      },
+      { timeout: 7000, enableHighAccuracy: true }
+    );
+  } else {
+    fetchLiveByCoords(12.9716, 77.5946, "Bengaluru, India (Regional Grid)");
   }
 }
 
-function applyPreset(presetKey) {
-  const p = PRESETS[presetKey];
-  if (!p) return;
+async function fetchLiveByCoords(lat, lon, customName = null) {
+  const t0 = performance.now();
+  const locNameEl = document.getElementById('currentLocationName');
+  const locCoordsEl = document.getElementById('currentLocationCoords');
 
-  setInputValue('tempInput', 'tempNum', p.temp);
-  setInputValue('humidityInput', 'humidityNum', p.humidity);
-  setInputValue('pressureInput', 'pressureNum', p.pressure);
-  setInputValue('windInput', 'windNum', p.wind);
-  setInputValue('prevRainInput', 'prevRainNum', p.prevRain);
+  try {
+    let url = `/api/live-weather?lat=${lat}&lon=${lon}`;
+    if (customName) url += `&city=${encodeURIComponent(customName)}`;
 
-  runInference();
+    const res = await fetch(url);
+    const data = await res.json();
+    const t1 = performance.now();
+
+    document.getElementById('latencyDisplay').textContent = `${Math.round(t1 - t0)} ms`;
+
+    if (data.status === 'success') {
+      currentPrediction = data;
+      currentLocation = {
+        name: data.location.name,
+        lat: data.location.latitude,
+        lon: data.location.longitude
+      };
+
+      locNameEl.textContent = data.location.name;
+      locCoordsEl.innerHTML = `Lat: <strong>${data.location.latitude}°</strong> &bull; Lon: <strong>${data.location.longitude}°</strong> &bull; Elev: ${data.location.elevation}m &bull; Timezone: ${data.location.timezone}`;
+
+      // Populate Cockpit inputs with real sensor data
+      setInputValue('tempInput', 'tempNum', data.inputs.temperature);
+      setInputValue('humidityInput', 'humidityNum', data.inputs.relative_humidity);
+      setInputValue('pressureInput', 'pressureNum', data.inputs.atmospheric_pressure);
+      setInputValue('windInput', 'windNum', data.inputs.wind_speed);
+      setInputValue('prevRainInput', 'prevRainNum', data.inputs.previous_rainfall);
+
+      updateConsoleDisplays(data);
+      updateRulesTable(data.fired_rules);
+      renderAllFuzzyCurves();
+      loadAuditLog();
+    } else {
+      alert("Weather API error: " + data.message);
+    }
+  } catch (err) {
+    console.error("Failed to fetch live weather:", err);
+  }
 }
 
-function setInputValue(sliderId, numId, val) {
-  document.getElementById(sliderId).value = val;
-  document.getElementById(numId).value = val.toFixed(1);
+function refreshCurrentLocation() {
+  if (currentLocation.lat !== null && currentLocation.lon !== null) {
+    fetchLiveByCoords(currentLocation.lat, currentLocation.lon, currentLocation.name);
+  } else {
+    detectUserLocation();
+  }
 }
 
-// Main Soft Computing Inference Routine
-async function runInference() {
+// City Search with Instant Geocoding
+function handleCitySearch(event) {
+  const q = event.target.value.trim();
+  const dropdown = document.getElementById('citySearchResults');
+
+  if (q.length < 2) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/search-city?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (data.status === 'success' && data.results.length > 0) {
+        dropdown.innerHTML = data.results.map(r => `
+          <div class="city-result-item" onclick="selectCity(${r.latitude}, ${r.longitude}, '${r.name}, ${r.country}')">
+            <span><strong>${r.name}</strong>, ${r.country}</span>
+            <span class="font-mono text-dim">${r.latitude.toFixed(2)}°, ${r.longitude.toFixed(2)}°</span>
+          </div>
+        `).join('');
+        dropdown.style.display = 'block';
+      } else {
+        dropdown.innerHTML = '<div class="city-result-item" style="color: #64748b;">No matching weather stations found</div>';
+        dropdown.style.display = 'block';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, 250);
+}
+
+function selectCity(lat, lon, label) {
+  document.getElementById('citySearchInput').value = '';
+  document.getElementById('citySearchResults').style.display = 'none';
+  fetchLiveByCoords(lat, lon, label);
+}
+
+// Close city dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.city-search-box')) {
+    const d = document.getElementById('citySearchResults');
+    if (d) d.style.display = 'none';
+  }
+});
+
+// Manual Scenario Execution
+async function runManualInference() {
   const t0 = performance.now();
   const payload = {
     temperature: parseFloat(document.getElementById('tempNum').value),
     relative_humidity: parseFloat(document.getElementById('humidityNum').value),
     atmospheric_pressure: parseFloat(document.getElementById('pressureNum').value),
     wind_speed: parseFloat(document.getElementById('windNum').value),
-    previous_rainfall: parseFloat(document.getElementById('prevRainNum').value)
+    previous_rainfall: parseFloat(document.getElementById('prevRainNum').value),
+    location: currentLocation.name ? `${currentLocation.name} (Simulation)` : "Manual Simulation"
   };
 
   try {
@@ -118,8 +227,60 @@ async function runInference() {
       loadAuditLog();
     }
   } catch (err) {
-    console.error('Inference pipeline error:', err);
+    console.error('Manual inference error:', err);
   }
+}
+
+// Input Synchronization & Steppers
+function syncFromSlider(sliderId, numId, decimals = 1) {
+  const val = parseFloat(document.getElementById(sliderId).value);
+  document.getElementById(numId).value = val.toFixed(decimals);
+  triggerManualStream();
+}
+
+function syncFromNum(sliderId, numId, decimals = 1) {
+  let val = parseFloat(document.getElementById(numId).value);
+  const slider = document.getElementById(sliderId);
+  if (isNaN(val)) val = parseFloat(slider.value);
+  val = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), val));
+  slider.value = val;
+  document.getElementById(numId).value = val.toFixed(decimals);
+  triggerManualStream();
+}
+
+function stepVal(sliderId, numId, delta, min, max, decimals = 1) {
+  let val = parseFloat(document.getElementById(numId).value) + delta;
+  val = Math.min(max, Math.max(min, val));
+  document.getElementById(sliderId).value = val;
+  document.getElementById(numId).value = val.toFixed(decimals);
+  triggerManualStream();
+}
+
+function triggerManualStream() {
+  if (currentMode === 'manual') {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runManualInference, 180);
+  }
+}
+
+function applyPreset(presetKey) {
+  setMode('manual');
+  const p = PRESETS[presetKey];
+  if (!p) return;
+
+  setInputValue('tempInput', 'tempNum', p.temp);
+  setInputValue('humidityInput', 'humidityNum', p.humidity);
+  setInputValue('pressureInput', 'pressureNum', p.pressure);
+  setInputValue('windInput', 'windNum', p.wind);
+  setInputValue('prevRainInput', 'prevRainNum', p.prevRain);
+
+  document.getElementById('currentLocationName').textContent = p.name;
+  runManualInference();
+}
+
+function setInputValue(sliderId, numId, val) {
+  document.getElementById(sliderId).value = val;
+  document.getElementById(numId).value = parseFloat(val).toFixed(1);
 }
 
 // Update Console Displays
@@ -452,7 +613,7 @@ async function loadAuditLog() {
     if (json.status === 'success') {
       const tbody = document.getElementById('auditTableBody');
       if (!json.history || json.history.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="table-placeholder">No audit logs recorded yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="table-placeholder">No audit logs recorded yet.</td></tr>';
         return;
       }
 
@@ -467,12 +628,14 @@ async function loadAuditLog() {
           humidity: row.relative_humidity,
           pressure: row.atmospheric_pressure,
           wind: row.wind_speed,
-          prevRain: row.previous_rainfall
+          prevRain: row.previous_rainfall,
+          loc: row.location || 'Simulated'
         }).replace(/"/g, '&quot;');
 
         return `
           <tr>
             <td class="font-mono">${row.timestamp.split(' ')[1] || row.timestamp}</td>
+            <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.location || 'Simulated'}</td>
             <td class="font-mono">${row.temperature}°C</td>
             <td class="font-mono">${row.relative_humidity}%</td>
             <td class="font-mono">${row.atmospheric_pressure} hPa</td>
@@ -498,13 +661,15 @@ async function loadAuditLog() {
 }
 
 function recallScenario(params) {
+  setMode('manual');
   setInputValue('tempInput', 'tempNum', params.temp);
   setInputValue('humidityInput', 'humidityNum', params.humidity);
   setInputValue('pressureInput', 'pressureNum', params.pressure);
   setInputValue('windInput', 'windNum', params.wind);
   setInputValue('prevRainInput', 'prevRainNum', params.prevRain);
+  document.getElementById('currentLocationName').textContent = params.loc || 'Recalled Historical Station';
   switchTab('tab-console');
-  runInference();
+  runManualInference();
 }
 
 async function clearAuditHistory() {
@@ -522,9 +687,10 @@ window.addEventListener('resize', () => {
   if (currentPrediction) renderAllFuzzyCurves();
 });
 
-// Boot Initialization
+// Boot Initialization: Automatically Detect Location
 document.addEventListener('DOMContentLoaded', () => {
   loadBenchmarkMetrics();
   loadAuditLog();
-  runInference();
+  setMode('live'); // Start in automated live mode
+  detectUserLocation();
 });

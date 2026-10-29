@@ -20,6 +20,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS prediction_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
+                location TEXT DEFAULT 'Local / Simulated',
                 temperature REAL NOT NULL,
                 relative_humidity REAL NOT NULL,
                 atmospheric_pressure REAL NOT NULL,
@@ -31,22 +32,29 @@ def init_db():
                 top_rule TEXT
             )
         ''')
+        # Ensure location column exists if table was created previously
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(prediction_history)")
+        columns = [row['name'] for row in cursor.fetchall()]
+        if 'location' not in columns:
+            cursor.execute("ALTER TABLE prediction_history ADD COLUMN location TEXT DEFAULT 'Local / Simulated'")
         conn.commit()
     finally:
         conn.close()
 
-def save_prediction(temp, humidity, pressure, wind_speed, prev_rain, pred_rain, risk_score, risk_level, top_rule=""):
+def save_prediction(temp, humidity, pressure, wind_speed, prev_rain, pred_rain, risk_score, risk_level, top_rule="", location="Local / Simulated"):
     conn = get_connection()
     try:
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO prediction_history (
-                timestamp, temperature, relative_humidity, atmospheric_pressure,
+                timestamp, location, temperature, relative_humidity, atmospheric_pressure,
                 wind_speed, previous_rainfall, predicted_rainfall,
                 risk_score, risk_level, top_rule
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            location,
             temp, humidity, pressure, wind_speed, prev_rain,
             pred_rain, risk_score, risk_level, top_rule
         ))

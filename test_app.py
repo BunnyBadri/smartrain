@@ -76,6 +76,27 @@ class SmartRainTestCase(unittest.TestCase):
         self.assertIn('baseline_model', data['metrics'])
         print(f"[PASS] GET /api/metrics: ANN R2={data['metrics']['ann_model']['r2_score']}")
 
+    def test_api_live_weather(self):
+        # Test automated live weather ingestion for coordinates
+        res = self.client.get('/api/live-weather?lat=12.9716&lon=77.5946')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['status'], 'success')
+        self.assertIn('location', data)
+        self.assertIn('inputs', data)
+        self.assertIn('predicted_rainfall', data)
+        self.assertIn('risk_level', data)
+        print(f"[PASS] GET /api/live-weather: {data['location']['name']} -> Temp {data['inputs']['temperature']}C, Rain {data['predicted_rainfall']}mm ({data['risk_level']})")
+
+    def test_api_search_city(self):
+        res = self.client.get('/api/search-city?q=Mumbai')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['status'], 'success')
+        self.assertTrue(len(data['results']) > 0)
+        self.assertEqual(data['results'][0]['name'], 'Mumbai')
+        print(f"[PASS] GET /api/search-city: Found {len(data['results'])} stations for Mumbai")
+
     def test_api_history_and_export(self):
         res = self.client.get('/api/history')
         self.assertEqual(res.status_code, 200)
