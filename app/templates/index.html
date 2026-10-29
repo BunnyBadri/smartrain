@@ -3,318 +3,499 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartRain | Soft Computing Rainfall Prediction & Risk Assessment</title>
+  <title>SmartRain | Meteorological Intelligence & Decision-Support Workstation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header / Navigation -->
-    <header class="header">
-      <div class="header-brand">
-        <div class="brand-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-            <path d="M11 15v6"/>
-            <path d="M7 17v4"/>
-            <path d="M15 17v4"/>
+  <div class="workstation">
+    <!-- Top System Telemetry Bar -->
+    <header class="sys-header">
+      <div class="sys-brand">
+        <div class="sys-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
           </svg>
         </div>
-        <div>
-          <div class="brand-title">SmartRain <span class="tag">ANN + Fuzzy Logic</span></div>
-          <p class="brand-subtitle">Intelligent Rainfall Prediction & Decision-Support Risk Assessment</p>
+        <div class="sys-identity">
+          <div class="sys-title">SMARTRAIN <span class="sys-version">WORKSTATION v2.4</span></div>
+          <div class="sys-subtitle">Meteorological Intelligence & Decision-Support System &bull; ANN + Mamdani FIS</div>
         </div>
       </div>
-      <div class="header-status">
-        <span class="status-dot"></span>
-        <span>Soft Computing Engines Active</span>
+
+      <div class="sys-telemetry">
+        <div class="telemetry-pill">
+          <span class="telemetry-label">INFERENCE ENGINE</span>
+          <span class="telemetry-val text-cyan"><span class="live-dot"></span>ANN (MLP) &bull; ONLINE</span>
+        </div>
+        <div class="telemetry-pill">
+          <span class="telemetry-label">DECISION LAYER</span>
+          <span class="telemetry-val text-emerald">MAMDANI FIS &bull; CALIBRATED</span>
+        </div>
+        <div class="telemetry-pill">
+          <span class="telemetry-label">LATENCY</span>
+          <span class="telemetry-val font-mono" id="latencyDisplay">14 ms</span>
+        </div>
       </div>
     </header>
 
-    <!-- Presets Quick Bar (Viva / Presentation Scenarios) -->
-    <section class="scenario-bar">
-      <span class="scenario-label">⚡ Demo Scenarios:</span>
-      <div class="scenario-buttons">
-        <button type="button" class="preset-btn" onclick="applyPreset('monsoon')">
-          🌧️ Monsoon Cloudburst
+    <!-- Navigation Tabs -->
+    <nav class="nav-bar">
+      <div class="nav-tabs">
+        <button type="button" class="tab-btn active" data-tab="tab-console" onclick="switchTab('tab-console')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Operational Console
         </button>
-        <button type="button" class="preset-btn" onclick="applyPreset('squall')">
-          🌪️ Pre-Monsoon Squall
+        <button type="button" class="tab-btn" data-tab="tab-fuzzy" onclick="switchTab('tab-fuzzy')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+          Fuzzy FIS Analyzer
         </button>
-        <button type="button" class="preset-btn" onclick="applyPreset('moderate')">
-          🌦️ Overcast Showers
+        <button type="button" class="tab-btn" data-tab="tab-benchmarks" onclick="switchTab('tab-benchmarks')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Model Validation & Diagnostics
         </button>
-        <button type="button" class="preset-btn" onclick="applyPreset('sunny')">
-          ☀️ Dry Sunny Day
+        <button type="button" class="tab-btn" data-tab="tab-history" onclick="switchTab('tab-history')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Telemetry & Audit Log
         </button>
       </div>
-    </section>
 
-    <!-- Main Workspace Grid -->
-    <main class="main-grid">
-      <!-- Input Panel Column -->
-      <section class="card input-card">
-        <div class="card-header">
-          <h2>1. Meteorological Observations</h2>
-          <span class="badge-neutral">Historical Features</span>
-        </div>
-        <p class="section-desc">Adjust ambient weather parameters to feed the Artificial Neural Network regressor.</p>
+      <div class="nav-controls">
+        <label class="toggle-control" title="Auto-recalculate predictions in real-time as parameters change">
+          <input type="checkbox" id="realtimeToggle" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Real-time Stream</span>
+        </label>
+      </div>
+    </nav>
 
-        <form id="predictionForm" onsubmit="event.preventDefault(); runPrediction();">
-          <!-- Temperature -->
-          <div class="form-group">
-            <div class="label-row">
-              <label for="tempInput">Temperature</label>
-              <div class="value-display"><span id="tempVal">28.0</span> °C</div>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="tempInput" min="10" max="48" step="0.5" value="28.0" oninput="syncVal('tempInput', 'tempVal', ' °C')">
-            </div>
-            <div class="range-labels"><span>10°C (Cold)</span><span>48°C (Extreme Heat)</span></div>
-          </div>
-
-          <!-- Relative Humidity -->
-          <div class="form-group">
-            <div class="label-row">
-              <label for="humidityInput">Relative Humidity</label>
-              <div class="value-display"><span id="humidityVal">72.0</span> %</div>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="humidityInput" min="15" max="100" step="1" value="72.0" oninput="syncVal('humidityInput', 'humidityVal', ' %')">
-            </div>
-            <div class="range-labels"><span>15% (Arid)</span><span>100% (Saturated)</span></div>
-          </div>
-
-          <!-- Atmospheric Pressure -->
-          <div class="form-group">
-            <div class="label-row">
-              <label for="pressureInput">Atmospheric Pressure</label>
-              <div class="value-display"><span id="pressureVal">1006.0</span> hPa</div>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="pressureInput" min="980" max="1030" step="1" value="1006.0" oninput="syncVal('pressureInput', 'pressureVal', ' hPa')">
-            </div>
-            <div class="range-labels"><span>980 hPa (Depression)</span><span>1030 hPa (High Pressure)</span></div>
-          </div>
-
-          <!-- Wind Speed -->
-          <div class="form-group">
-            <div class="label-row">
-              <label for="windInput">Wind Speed</label>
-              <div class="value-display"><span id="windVal">22.0</span> km/h</div>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="windInput" min="0" max="70" step="1" value="22.0" oninput="syncVal('windInput', 'windVal', ' km/h')">
-            </div>
-            <div class="range-labels"><span>0 km/h (Calm)</span><span>70 km/h (Gale)</span></div>
-          </div>
-
-          <!-- Previous Rainfall -->
-          <div class="form-group">
-            <div class="label-row">
-              <label for="prevRainInput">Prior 24h Rainfall</label>
-              <div class="value-display"><span id="prevRainVal">18.0</span> mm</div>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="prevRainInput" min="0" max="150" step="1" value="18.0" oninput="syncVal('prevRainInput', 'prevRainVal', ' mm')">
-            </div>
-            <div class="range-labels"><span>0 mm (Dry Ground)</span><span>150 mm (Pre-Flooded)</span></div>
-          </div>
-
-          <button type="submit" id="submitBtn" class="btn-primary">
-            <span class="btn-text">Execute Soft Computing Pipeline</span>
-            <div class="spinner" id="spinner" style="display: none;"></div>
+    <!-- TAB 1: OPERATIONAL CONSOLE -->
+    <div id="tab-console" class="tab-content active">
+      <!-- Station Scenario Presets -->
+      <div class="scenario-strip">
+        <span class="strip-label">CALIBRATED SCENARIO PRESETS:</span>
+        <div class="strip-buttons">
+          <button type="button" class="preset-chip" onclick="applyPreset('monsoon')">
+            <span class="chip-status bg-red"></span>
+            Monsoon Depression
           </button>
-        </form>
-      </section>
+          <button type="button" class="preset-chip" onclick="applyPreset('squall')">
+            <span class="chip-status bg-orange"></span>
+            Pre-Monsoon Convection
+          </button>
+          <button type="button" class="preset-chip" onclick="applyPreset('moderate')">
+            <span class="chip-status bg-amber"></span>
+            Overcast Steady Rain
+          </button>
+          <button type="button" class="preset-chip" onclick="applyPreset('sunny')">
+            <span class="chip-status bg-emerald"></span>
+            Anticyclonic Fair Weather
+          </button>
+        </div>
+      </div>
 
-      <!-- Results Column -->
-      <section class="results-column">
-        <!-- Predicted Rainfall Card -->
-        <div class="card result-card">
-          <div class="card-header">
-            <h2>2. ANN Prediction</h2>
-            <span class="badge-stage">MLP Regression</span>
+      <div class="console-grid">
+        <!-- Left: Meteorological Cockpit Form -->
+        <section class="panel cockpit-panel">
+          <div class="panel-header">
+            <div class="panel-heading">
+              <span class="panel-tag">PRIMARY TELEMETRY</span>
+              <h3>Meteorological Observations</h3>
+            </div>
+            <span class="station-id">STN-IN-412 &bull; 80m ASL</span>
           </div>
 
-          <div class="prediction-main">
-            <div class="pred-number-group">
-              <span class="pred-value" id="predRainValue">--</span>
-              <span class="pred-unit">mm</span>
-            </div>
-            <div class="pred-desc" id="predRainDesc">Awaiting input simulation...</div>
-
-            <!-- Rainfall Depth Gauge -->
-            <div class="gauge-container">
-              <div class="gauge-bar-bg">
-                <div class="gauge-bar-fill" id="gaugeFill" style="width: 0%;"></div>
+          <form id="cockpitForm" class="cockpit-form" onsubmit="event.preventDefault(); runInference();">
+            <!-- Temperature -->
+            <div class="param-box">
+              <div class="param-meta">
+                <label for="tempInput" class="param-title">Dry-Bulb Temperature</label>
+                <div class="param-digits">
+                  <input type="number" id="tempNum" class="num-input" value="28.0" min="10" max="48" step="0.1" onchange="syncFromNum('tempInput', 'tempNum', 1)">
+                  <span class="unit">°C</span>
+                </div>
               </div>
-              <div class="gauge-ticks">
+              <div class="slider-stepper-row">
+                <button type="button" class="step-btn" onclick="stepVal('tempInput', 'tempNum', -0.5, 10, 48, 1)">−</button>
+                <input type="range" id="tempInput" min="10" max="48" step="0.1" value="28.0" oninput="syncFromSlider('tempInput', 'tempNum', 1)">
+                <button type="button" class="step-btn" onclick="stepVal('tempInput', 'tempNum', 0.5, 10, 48, 1)">+</button>
+              </div>
+              <div class="param-axis"><span>10°C (Cold Front)</span><span>29°C (Tropical Norm)</span><span>48°C (Extreme Heat)</span></div>
+            </div>
+
+            <!-- Relative Humidity -->
+            <div class="param-box">
+              <div class="param-meta">
+                <label for="humidityInput" class="param-title">Relative Humidity</label>
+                <div class="param-digits">
+                  <input type="number" id="humidityNum" class="num-input" value="72.0" min="15" max="100" step="0.5" onchange="syncFromNum('humidityInput', 'humidityNum', 1)">
+                  <span class="unit">%</span>
+                </div>
+              </div>
+              <div class="slider-stepper-row">
+                <button type="button" class="step-btn" onclick="stepVal('humidityInput', 'humidityNum', -1.0, 15, 100, 1)">−</button>
+                <input type="range" id="humidityInput" min="15" max="100" step="0.5" value="72.0" oninput="syncFromSlider('humidityInput', 'humidityNum', 1)">
+                <button type="button" class="step-btn" onclick="stepVal('humidityInput', 'humidityNum', 1.0, 15, 100, 1)">+</button>
+              </div>
+              <div class="param-axis"><span>15% (Dry Air)</span><span>65% (Dew Saturation)</span><span>100% (Condensation)</span></div>
+            </div>
+
+            <!-- Atmospheric Pressure -->
+            <div class="param-box">
+              <div class="param-meta">
+                <label for="pressureInput" class="param-title">Surface Barometric Pressure</label>
+                <div class="param-digits">
+                  <input type="number" id="pressureNum" class="num-input" value="1006.0" min="980" max="1030" step="0.5" onchange="syncFromNum('pressureInput', 'pressureNum', 1)">
+                  <span class="unit">hPa</span>
+                </div>
+              </div>
+              <div class="slider-stepper-row">
+                <button type="button" class="step-btn" onclick="stepVal('pressureInput', 'pressureNum', -1.0, 980, 1030, 1)">−</button>
+                <input type="range" id="pressureInput" min="980" max="1030" step="0.5" value="1006.0" oninput="syncFromSlider('pressureInput', 'pressureNum', 1)">
+                <button type="button" class="step-btn" onclick="stepVal('pressureInput', 'pressureNum', 1.0, 980, 1030, 1)">+</button>
+              </div>
+              <div class="param-axis"><span>980 hPa (Deep Depression)</span><span>1013 hPa (MSLP)</span><span>1030 hPa (High Pressure)</span></div>
+            </div>
+
+            <!-- Wind Velocity -->
+            <div class="param-box">
+              <div class="param-meta">
+                <label for="windInput" class="param-title">10-Meter Wind Velocity</label>
+                <div class="param-digits">
+                  <input type="number" id="windNum" class="num-input" value="22.0" min="0" max="75" step="0.5" onchange="syncFromNum('windInput', 'windNum', 1)">
+                  <span class="unit">km/h</span>
+                </div>
+              </div>
+              <div class="slider-stepper-row">
+                <button type="button" class="step-btn" onclick="stepVal('windInput', 'windNum', -1.0, 0, 75, 1)">−</button>
+                <input type="range" id="windInput" min="0" max="75" step="0.5" value="22.0" oninput="syncFromSlider('windInput', 'windNum', 1)">
+                <button type="button" class="step-btn" onclick="stepVal('windInput', 'windNum', 1.0, 0, 75, 1)">+</button>
+              </div>
+              <div class="param-axis"><span>0 km/h (Calm)</span><span>35 km/h (Squall)</span><span>75 km/h (Storm Force)</span></div>
+            </div>
+
+            <!-- Prior 24h Rainfall -->
+            <div class="param-box">
+              <div class="param-meta">
+                <label for="prevRainInput" class="param-title">Prior 24-Hour Precipitation</label>
+                <div class="param-digits">
+                  <input type="number" id="prevRainNum" class="num-input" value="18.0" min="0" max="150" step="0.5" onchange="syncFromNum('prevRainInput', 'prevRainNum', 1)">
+                  <span class="unit">mm</span>
+                </div>
+              </div>
+              <div class="slider-stepper-row">
+                <button type="button" class="step-btn" onclick="stepVal('prevRainInput', 'prevRainNum', -2.0, 0, 150, 1)">−</button>
+                <input type="range" id="prevRainInput" min="0" max="150" step="0.5" value="18.0" oninput="syncFromSlider('prevRainInput', 'prevRainNum', 1)">
+                <button type="button" class="step-btn" onclick="stepVal('prevRainInput', 'prevRainNum', 2.0, 0, 150, 1)">+</button>
+              </div>
+              <div class="param-axis"><span>0 mm (Dry Ground)</span><span>45 mm (Soil Saturation)</span><span>150 mm (Pre-Flooded)</span></div>
+            </div>
+
+            <button type="submit" id="executeBtn" class="btn-execute">
+              <span class="btn-caption">Compute Soft Computing Pipeline</span>
+              <span class="btn-hotkey">⚡ Instant</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- Right: Dynamics, Gauge, Matrix, & Advisory -->
+        <section class="dynamics-column">
+          <!-- Dual Meters Row: Circular Arc + 2D Matrix -->
+          <div class="meters-row">
+            <!-- Circular Arc Gauge -->
+            <div class="panel arc-panel">
+              <div class="panel-header">
+                <div class="panel-heading">
+                  <span class="panel-tag">ANN REGRESSION OUTPUT</span>
+                  <h4>Precipitation Forecast</h4>
+                </div>
+              </div>
+
+              <div class="arc-container">
+                <svg viewBox="0 0 200 130" class="gauge-svg">
+                  <!-- Background Arc -->
+                  <path class="arc-track" d="M 25 115 A 75 75 0 0 1 175 115" fill="none" stroke-width="12" stroke-linecap="round"/>
+                  <!-- Active Meter Fill Arc -->
+                  <path id="gaugeMeter" class="arc-fill" d="M 25 115 A 75 75 0 0 1 175 115" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="235.6" stroke-dashoffset="235.6"/>
+                </svg>
+                <div class="arc-overlay">
+                  <div class="arc-val font-mono" id="predRainVal">--</div>
+                  <div class="arc-unit">MILLIMETERS (mm)</div>
+                  <div class="arc-badge" id="rainClassBadge">CALCULATING...</div>
+                </div>
+              </div>
+
+              <div class="arc-ticks">
                 <span>0 mm</span>
-                <span>20 mm</span>
+                <span>25 mm</span>
                 <span>50 mm</span>
-                <span>80 mm+</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fuzzy Risk Assessment Card -->
-        <div class="card risk-card">
-          <div class="card-header">
-            <h2>3. Fuzzy Logic Risk Assessment</h2>
-            <span class="badge-stage">Mamdani Inference</span>
-          </div>
-
-          <div class="risk-main">
-            <div class="risk-badge-container">
-              <div class="risk-badge" id="riskBadge" style="background: rgba(100, 116, 139, 0.2); border-color: #64748b; color: #94a3b8;">
-                PENDING
-              </div>
-              <div class="risk-score-pill">
-                Crisp Risk Score: <strong id="riskScore">--</strong> / 100
+                <span>75 mm+</span>
               </div>
             </div>
 
-            <!-- Operational Advisory Alert -->
-            <div class="advisory-box" id="advisoryBox">
-              <div class="advisory-icon">💡</div>
-              <div class="advisory-content">
-                <div class="advisory-title">Operational Advisory</div>
-                <div class="advisory-text" id="advisoryText">Click "Execute Soft Computing Pipeline" to evaluate weather conditions.</div>
+            <!-- 2D Meteorological Risk Matrix -->
+            <div class="panel matrix-panel">
+              <div class="panel-header">
+                <div class="panel-heading">
+                  <span class="panel-tag">MAMDANI CONCURRENT MATRIX</span>
+                  <h4>Precipitation vs. Saturation</h4>
+                </div>
+              </div>
+
+              <div class="matrix-grid-container">
+                <div class="matrix-y-axis">RAIN RATE (mm) &rarr;</div>
+                <div class="matrix-table-wrap">
+                  <div class="matrix-grid">
+                    <div class="matrix-cell" id="cell-ext-low">MOD</div>
+                    <div class="matrix-cell" id="cell-ext-mod">HIGH</div>
+                    <div class="matrix-cell" id="cell-ext-high">CRITICAL</div>
+
+                    <div class="matrix-cell" id="cell-heavy-low">MOD</div>
+                    <div class="matrix-cell" id="cell-heavy-mod">HIGH</div>
+                    <div class="matrix-cell" id="cell-heavy-high">HIGH</div>
+
+                    <div class="matrix-cell" id="cell-mod-low">LOW</div>
+                    <div class="matrix-cell" id="cell-mod-mod">MOD</div>
+                    <div class="matrix-cell" id="cell-mod-high">HIGH</div>
+
+                    <div class="matrix-cell" id="cell-low-low">LOW</div>
+                    <div class="matrix-cell" id="cell-low-mod">LOW</div>
+                    <div class="matrix-cell" id="cell-low-high">MOD</div>
+                  </div>
+                  <div class="matrix-x-axis">&larr; HUMIDITY SATURATION (%) &rarr;</div>
+                </div>
+              </div>
+
+              <div class="matrix-legend">
+                <span class="legend-item"><span class="legend-box bg-emerald"></span> Minimal</span>
+                <span class="legend-item"><span class="legend-box bg-amber"></span> Moderate</span>
+                <span class="legend-item"><span class="legend-box bg-orange"></span> Elevated</span>
+                <span class="legend-item"><span class="legend-box bg-red"></span> Critical</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
 
-    <!-- Fuzzy Explainability Section -->
-    <section class="card explain-card" id="explainSection">
-      <div class="card-header">
-        <div>
-          <h2>Fuzzy Logic Explainability & Active Linguistic Rules</h2>
-          <p class="section-desc">Transparent Mamdani inference layer: why this risk level was assigned.</p>
-        </div>
-        <span class="badge-accent">Decision Transparency</span>
-      </div>
+          <!-- Risk Assessment Banner & Index -->
+          <div class="panel risk-summary-panel">
+            <div class="risk-indicator-row">
+              <div class="risk-classification">
+                <span class="panel-tag">DEFUZZIFIED CLASSIFICATION</span>
+                <div class="risk-badge-large" id="riskBadgeLarge">
+                  EVALUATING
+                </div>
+              </div>
+              <div class="risk-metric-block">
+                <span class="panel-tag">CRISP CENTROID INDEX</span>
+                <div class="crisp-score-box">
+                  <span class="crisp-num font-mono" id="crispScoreNum">--</span>
+                  <span class="crisp-max">/ 100</span>
+                </div>
+              </div>
+            </div>
 
-      <div class="explain-grid">
-        <!-- Fired Rules List -->
-        <div class="explain-panel">
-          <h3 class="panel-subtitle">Activated Rule Set (Ranked by Firing Strength)</h3>
-          <div id="rulesList" class="rules-list">
-            <div class="placeholder-text">Run a prediction to inspect active fuzzy rules.</div>
-          </div>
-        </div>
-
-        <!-- Input Membership Breakdown -->
-        <div class="explain-panel">
-          <h3 class="panel-subtitle">Fuzzified Membership Breakdown</h3>
-          <div class="membership-group">
-            <span class="sub-label">Predicted Rainfall Degree:</span>
-            <div id="rainMemberships" class="membership-bars">
-              <div class="placeholder-text">Pending calculation</div>
+            <!-- Operational Protocol Advisory -->
+            <div class="protocol-box" id="protocolBox">
+              <div class="protocol-header">
+                <svg class="protocol-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span class="protocol-title">OPERATIONAL DECISION-SUPPORT PROTOCOL</span>
+              </div>
+              <p class="protocol-text" id="protocolText">Awaiting telemetry inputs to compute operational impact guidance.</p>
             </div>
           </div>
-          <div class="membership-group" style="margin-top: 1rem;">
-            <span class="sub-label">Relative Humidity Degree:</span>
-            <div id="humidityMemberships" class="membership-bars">
-              <div class="placeholder-text">Pending calculation</div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB 2: FUZZY FIS ANALYZER -->
+    <div id="tab-fuzzy" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-heading">
+            <span class="panel-tag">CONTINUOUS MATHEMATICAL CURVES</span>
+            <h3>Interactive Mamdani Membership Functions</h3>
+          </div>
+          <span class="panel-note">Real-time piecewise triangular & trapezoidal curves rendered via HTML5 Canvas</span>
+        </div>
+
+        <div class="canvas-grid">
+          <!-- Canvas 1: Rainfall Curves -->
+          <div class="canvas-card">
+            <div class="canvas-card-header">
+              <div class="canvas-title">Input 1: Predicted Rainfall (mm) &bull; Domain: [0, 100]</div>
+              <div class="canvas-current font-mono">Input: <span id="canvasRainValue" class="text-cyan">-- mm</span></div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="canvasRain" width="560" height="180"></canvas>
+            </div>
+            <div class="curve-legend">
+              <span class="legend-chip" style="color: #60a5fa;"><span class="chip-line" style="background: #60a5fa;"></span> Low [0, 0, 5, 15]</span>
+              <span class="legend-chip" style="color: #38bdf8;"><span class="chip-line" style="background: #38bdf8;"></span> Moderate [10, 25, 45]</span>
+              <span class="legend-chip" style="color: #f59e0b;"><span class="chip-line" style="background: #f59e0b;"></span> Heavy [35, 55, 80]</span>
+              <span class="legend-chip" style="color: #ef4444;"><span class="chip-line" style="background: #ef4444;"></span> Extreme [65, 95, 200, 200]</span>
+            </div>
+          </div>
+
+          <!-- Canvas 2: Relative Humidity Curves -->
+          <div class="canvas-card">
+            <div class="canvas-card-header">
+              <div class="canvas-title">Input 2: Relative Humidity (%) &bull; Domain: [0, 100]</div>
+              <div class="canvas-current font-mono">Input: <span id="canvasHumidityValue" class="text-emerald">-- %</span></div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="canvasHumidity" width="560" height="180"></canvas>
+            </div>
+            <div class="curve-legend">
+              <span class="legend-chip" style="color: #34d399;"><span class="chip-line" style="background: #34d399;"></span> Low [0, 0, 35, 55]</span>
+              <span class="legend-chip" style="color: #fbbf24;"><span class="chip-line" style="background: #fbbf24;"></span> Moderate [45, 65, 80]</span>
+              <span class="legend-chip" style="color: #f87171;"><span class="chip-line" style="background: #f87171;"></span> High [70, 85, 100, 100]</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rule Base Activation Table -->
+        <div class="rules-section">
+          <div class="panel-header" style="margin-top: 1.5rem;">
+            <div class="panel-heading">
+              <span class="panel-tag">INFERENCE MATRIX</span>
+              <h4>Active Mamdani Linguistic Rules & Alpha Cuts</h4>
+            </div>
+            <span class="panel-note">Mamdani Implication: MIN &bull; Aggregation: MAX &bull; Centroid Defuzzification</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="workstation-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Rule ID</th>
+                  <th>Antecedent & Consequent Formulation</th>
+                  <th style="width: 140px;">Consequent Set</th>
+                  <th style="width: 200px;">Alpha-Cut Strength (&alpha;)</th>
+                  <th style="width: 100px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="rulesTableBody">
+                <tr><td colspan="5" class="table-placeholder">Run an inference to populate rule activation matrix.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MODEL VALIDATION & DIAGNOSTICS -->
+    <div id="tab-benchmarks" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-heading">
+            <span class="panel-tag">RIGOROUS EXPERIMENTAL EVALUATION</span>
+            <h3>Artificial Neural Network Performance Benchmark</h3>
+          </div>
+          <span class="panel-note">Evaluated on 3,000 meteorological records (80/20 train/test split)</span>
+        </div>
+
+        <div class="metrics-cards-row">
+          <div class="metric-card">
+            <div class="metric-label">ANN MEAN ABSOLUTE ERROR</div>
+            <div class="metric-big font-mono" id="bmAnnMae">-- mm</div>
+            <div class="metric-comp">Baseline Dummy: <span id="bmBaseMae" class="font-mono">-- mm</span></div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">ROOT MEAN SQUARED ERROR</div>
+            <div class="metric-big font-mono" id="bmAnnRmse">-- mm</div>
+            <div class="metric-comp">Baseline Dummy: <span id="bmBaseRmse" class="font-mono">-- mm</span></div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">COEFFICIENT OF DETERMINATION (R²)</div>
+            <div class="metric-big font-mono text-cyan" id="bmAnnR2">--</div>
+            <div class="metric-comp">Strong predictive fit across nonlinear rain fronts</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">ERROR REDUCTION VS. BASELINE</div>
+            <div class="metric-big font-mono text-emerald" id="bmImprovement">-- %</div>
+            <div class="metric-comp">Reduction in variance vs historical average</div>
+          </div>
+        </div>
+
+        <!-- Architecture Breakdown -->
+        <div class="arch-breakdown">
+          <div class="arch-box">
+            <h4>Neural Network Specification (MLPRegressor)</h4>
+            <div class="spec-table">
+              <div class="spec-row"><span class="spec-key">Network Architecture</span><span class="spec-val">Feedforward Multi-Layer Perceptron (3 Hidden Layers)</span></div>
+              <div class="spec-row"><span class="spec-key">Hidden Layer Topology</span><span class="spec-val font-mono">[64 &rarr; 32 &rarr; 16] Neurons</span></div>
+              <div class="spec-row"><span class="spec-key">Activation Function</span><span class="spec-val">Rectified Linear Unit (ReLU)</span></div>
+              <div class="spec-row"><span class="spec-key">Optimization Algorithm</span><span class="spec-val">Adam (&alpha; = 0.001, early stopping)</span></div>
+              <div class="spec-row"><span class="spec-key">Dataset Volume</span><span class="spec-val">3,000 synthetic meteorological samples (2,400 Train / 600 Test)</span></div>
+            </div>
+          </div>
+
+          <div class="arch-box">
+            <h4>Soft Computing Technique Justification (Viva Guide)</h4>
+            <div class="justification-text">
+              <p><strong>Role of ANN:</strong> Meteorological parameters (pressure drops, moisture saturation, thermal convective currents) exhibit complex nonlinear physical interactions that cannot be accurately captured by simple linear regressors. The MLP learns these multidimensional nonlinear patterns directly from historical observations.</p>
+              <p><strong>Role of Fuzzy Logic:</strong> Traditional ML models function as unexplainable numerical "black boxes". A farmer or reservoir controller cannot gauge operational risk from a bare number alone. The Mamdani FIS provides human-centered, linguistically transparent decision support.</p>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Model Benchmark & Evaluation Section (Review II Academic Criteria) -->
-    <section class="card metrics-card">
-      <div class="card-header">
-        <div>
-          <h2>Model Evaluation & Baseline Benchmark</h2>
-          <p class="section-desc">Experimental regression results on 3,000 meteorological records (80/20 train/test split).</p>
+    <!-- TAB 4: TELEMETRY & AUDIT LOG -->
+    <div id="tab-history" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-heading">
+            <span class="panel-tag">PERSISTENT SIMULATION LOG</span>
+            <h3>Audit Trail & Historical Telemetry</h3>
+          </div>
+          <div class="table-actions">
+            <a href="/api/export-csv" class="action-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </a>
+            <button type="button" class="action-btn" onclick="clearAuditHistory()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Clear Log
+            </button>
+          </div>
         </div>
-        <span class="badge-neutral">Academic Review Rubric</span>
-      </div>
 
-      <div class="metrics-grid" id="metricsContainer">
-        <!-- Loaded dynamically via /api/metrics -->
-        <div class="metric-box">
-          <div class="metric-title">ANN Mean Absolute Error (MAE)</div>
-          <div class="metric-value" id="annMae">-- mm</div>
-          <div class="metric-sub" id="maeImprovement">Baseline: -- mm</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-title">ANN Root Mean Squared Error (RMSE)</div>
-          <div class="metric-value" id="annRmse">-- mm</div>
-          <div class="metric-sub" id="rmseImprovement">Baseline: -- mm</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-title">Goodness of Fit (R² Score)</div>
-          <div class="metric-value" id="annR2">--</div>
-          <div class="metric-sub">Regression quality vs Mean Predictor</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-title">Error Reduction vs Baseline</div>
-          <div class="metric-value metric-success" id="overallImprovement">-- %</div>
-          <div class="metric-sub">Improvement over historical baseline</div>
-        </div>
-      </div>
-
-      <div class="architecture-specs">
-        <div class="spec-item"><strong>Model Architecture:</strong> Multi-Layer Perceptron (MLPRegressor)</div>
-        <div class="spec-item"><strong>Hidden Layer Topography:</strong> 3 Layers [64, 32, 16 neurons]</div>
-        <div class="spec-item"><strong>Activation:</strong> ReLU with Adam optimizer</div>
-        <div class="spec-item"><strong>Dataset Samples:</strong> 3,000 observations (2,400 train / 600 test)</div>
-      </div>
-    </section>
-
-    <!-- Simulation History Table -->
-    <section class="card history-card">
-      <div class="card-header">
-        <div>
-          <h2>Simulation History & Audit Log</h2>
-          <p class="section-desc">Persistent local records of simulation tests.</p>
-        </div>
-        <div class="history-actions">
-          <a href="/api/export-csv" class="btn-outline">📥 Export CSV</a>
-          <button type="button" class="btn-outline" onclick="clearHistoryLog()">🗑️ Clear</button>
+        <div class="table-responsive">
+          <table class="workstation-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Temp</th>
+                <th>Humidity</th>
+                <th>Pressure</th>
+                <th>Wind</th>
+                <th>Prior Rain</th>
+                <th>Predicted Rain</th>
+                <th>Risk Score</th>
+                <th>Classification</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr><td colspan="10" class="table-placeholder">No audit logs recorded yet.</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <div class="table-responsive">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Temp</th>
-              <th>Humidity</th>
-              <th>Pressure</th>
-              <th>Wind</th>
-              <th>Prior Rain</th>
-              <th>Predicted Rain</th>
-              <th>Risk Score</th>
-              <th>Risk Category</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody">
-            <tr>
-              <td colspan="9" class="placeholder-text">No simulations run yet.</td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Station Footer -->
+    <footer class="sys-footer">
+      <div class="footer-left">
+        <strong>SmartRain Meteorological Workstation</strong> &bull; Developed for Academic Review II & Soft Computing Defense.
       </div>
-    </section>
-
-    <!-- Academic Footer -->
-    <footer class="footer">
-      <div>
-        <strong>SmartRain</strong>: Intelligent Rainfall Prediction & Risk Assessment using Soft Computing.
-      </div>
-      <div class="footer-refs">
-        References: Abu Saleh et al. (2024), Ruiz-Hurtado et al. (2024), India Meteorological Department.
+      <div class="footer-right font-mono">
+        STN-GRID: IMD-SA-412 &bull; COMPLIANT WITH ABU SALEH ET AL. (2024)
       </div>
     </footer>
   </div>

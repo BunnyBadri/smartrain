@@ -245,3 +245,4 @@ if __name__ == '__main__':
         res = fuzzy.evaluate_risk(rain, hum, pres)
         print(f"Rain: {rain}mm, Hum: {hum}%, Pres: {pres}hPa -> Risk: {res['risk_score']} ({res['risk_level']})")
         print(f"Top Rule: {res['fired_rules'][0] if res['fired_rules'] else 'None'}")
+

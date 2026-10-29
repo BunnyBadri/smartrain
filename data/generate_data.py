@@ -92,3 +92,4 @@ if __name__ == '__main__':
     df.to_csv(output_path, index=False)
     print(f"Generated {len(df)} historical weather records saved to {output_path}")
     print(df.describe())
+

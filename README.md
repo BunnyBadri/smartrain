@@ -82,3 +82,4 @@ python test_app.py
   * Meteorological parameters interact in complex, non-linear ways (e.g. pressure drops + humidity spikes). ANNs excel at universal non-linear function approximation from historical records.
 * **Why Fuzzy Logic?**
   * Machine learning models are numerical "black boxes". Fuzzy logic uses linguistic rules (e.g., *“IF Rain is HEAVY AND Humidity is HIGH THEN Risk is VERY HIGH”*) to provide explainable, human-centered decision support for non-technical stakeholders (farmers, disaster managers).
+

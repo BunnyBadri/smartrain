@@ -117,3 +117,4 @@ def export_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment;filename=smartrain_predictions.csv"}
     )
+
