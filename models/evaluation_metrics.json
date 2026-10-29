@@ -1,0 +1,33 @@
+{
+  "total_samples": 3000,
+  "train_samples": 2400,
+  "test_samples": 600,
+  "features": [
+    "temperature",
+    "relative_humidity",
+    "atmospheric_pressure",
+    "wind_speed",
+    "previous_rainfall"
+  ],
+  "ann_model": {
+    "mae": 4.682,
+    "rmse": 6.787,
+    "r2_score": 0.7651,
+    "iterations": 37,
+    "hidden_layers": [
+      64,
+      32,
+      16
+    ]
+  },
+  "baseline_model": {
+    "name": "Historical Average Baseline",
+    "mae": 12.107,
+    "rmse": 14.018,
+    "r2_score": -0.0022
+  },
+  "improvement": {
+    "mae_reduction_percent": 61.32,
+    "rmse_reduction_percent": 51.58
+  }
+}

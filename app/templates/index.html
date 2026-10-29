@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartRain | Soft Computing Rainfall Prediction & Risk Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header / Navigation -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            <path d="M11 15v6"/>
+            <path d="M7 17v4"/>
+            <path d="M15 17v4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">SmartRain <span class="tag">ANN + Fuzzy Logic</span></div>
+          <p class="brand-subtitle">Intelligent Rainfall Prediction & Decision-Support Risk Assessment</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-dot"></span>
+        <span>Soft Computing Engines Active</span>
+      </div>
+    </header>
+
+    <!-- Presets Quick Bar (Viva / Presentation Scenarios) -->
+    <section class="scenario-bar">
+      <span class="scenario-label">⚡ Demo Scenarios:</span>
+      <div class="scenario-buttons">
+        <button type="button" class="preset-btn" onclick="applyPreset('monsoon')">
+          🌧️ Monsoon Cloudburst
+        </button>
+        <button type="button" class="preset-btn" onclick="applyPreset('squall')">
+          🌪️ Pre-Monsoon Squall
+        </button>
+        <button type="button" class="preset-btn" onclick="applyPreset('moderate')">
+          🌦️ Overcast Showers
+        </button>
+        <button type="button" class="preset-btn" onclick="applyPreset('sunny')">
+          ☀️ Dry Sunny Day
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="main-grid">
+      <!-- Input Panel Column -->
+      <section class="card input-card">
+        <div class="card-header">
+          <h2>1. Meteorological Observations</h2>
+          <span class="badge-neutral">Historical Features</span>
+        </div>
+        <p class="section-desc">Adjust ambient weather parameters to feed the Artificial Neural Network regressor.</p>
+
+        <form id="predictionForm" onsubmit="event.preventDefault(); runPrediction();">
+          <!-- Temperature -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="tempInput">Temperature</label>
+              <div class="value-display"><span id="tempVal">28.0</span> °C</div>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="tempInput" min="10" max="48" step="0.5" value="28.0" oninput="syncVal('tempInput', 'tempVal', ' °C')">
+            </div>
+            <div class="range-labels"><span>10°C (Cold)</span><span>48°C (Extreme Heat)</span></div>
+          </div>
+
+          <!-- Relative Humidity -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="humidityInput">Relative Humidity</label>
+              <div class="value-display"><span id="humidityVal">72.0</span> %</div>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="humidityInput" min="15" max="100" step="1" value="72.0" oninput="syncVal('humidityInput', 'humidityVal', ' %')">
+            </div>
+            <div class="range-labels"><span>15% (Arid)</span><span>100% (Saturated)</span></div>
+          </div>
+
+          <!-- Atmospheric Pressure -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="pressureInput">Atmospheric Pressure</label>
+              <div class="value-display"><span id="pressureVal">1006.0</span> hPa</div>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="pressureInput" min="980" max="1030" step="1" value="1006.0" oninput="syncVal('pressureInput', 'pressureVal', ' hPa')">
+            </div>
+            <div class="range-labels"><span>980 hPa (Depression)</span><span>1030 hPa (High Pressure)</span></div>
+          </div>
+
+          <!-- Wind Speed -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="windInput">Wind Speed</label>
+              <div class="value-display"><span id="windVal">22.0</span> km/h</div>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="windInput" min="0" max="70" step="1" value="22.0" oninput="syncVal('windInput', 'windVal', ' km/h')">
+            </div>
+            <div class="range-labels"><span>0 km/h (Calm)</span><span>70 km/h (Gale)</span></div>
+          </div>
+
+          <!-- Previous Rainfall -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="prevRainInput">Prior 24h Rainfall</label>
+              <div class="value-display"><span id="prevRainVal">18.0</span> mm</div>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="prevRainInput" min="0" max="150" step="1" value="18.0" oninput="syncVal('prevRainInput', 'prevRainVal', ' mm')">
+            </div>
+            <div class="range-labels"><span>0 mm (Dry Ground)</span><span>150 mm (Pre-Flooded)</span></div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn-primary">
+            <span class="btn-text">Execute Soft Computing Pipeline</span>
+            <div class="spinner" id="spinner" style="display: none;"></div>
+          </button>
+        </form>
+      </section>
+
+      <!-- Results Column -->
+      <section class="results-column">
+        <!-- Predicted Rainfall Card -->
+        <div class="card result-card">
+          <div class="card-header">
+            <h2>2. ANN Prediction</h2>
+            <span class="badge-stage">MLP Regression</span>
+          </div>
+
+          <div class="prediction-main">
+            <div class="pred-number-group">
+              <span class="pred-value" id="predRainValue">--</span>
+              <span class="pred-unit">mm</span>
+            </div>
+            <div class="pred-desc" id="predRainDesc">Awaiting input simulation...</div>
+
+            <!-- Rainfall Depth Gauge -->
+            <div class="gauge-container">
+              <div class="gauge-bar-bg">
+                <div class="gauge-bar-fill" id="gaugeFill" style="width: 0%;"></div>
+              </div>
+              <div class="gauge-ticks">
+                <span>0 mm</span>
+                <span>20 mm</span>
+                <span>50 mm</span>
+                <span>80 mm+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fuzzy Risk Assessment Card -->
+        <div class="card risk-card">
+          <div class="card-header">
+            <h2>3. Fuzzy Logic Risk Assessment</h2>
+            <span class="badge-stage">Mamdani Inference</span>
+          </div>
+
+          <div class="risk-main">
+            <div class="risk-badge-container">
+              <div class="risk-badge" id="riskBadge" style="background: rgba(100, 116, 139, 0.2); border-color: #64748b; color: #94a3b8;">
+                PENDING
+              </div>
+              <div class="risk-score-pill">
+                Crisp Risk Score: <strong id="riskScore">--</strong> / 100
+              </div>
+            </div>
+
+            <!-- Operational Advisory Alert -->
+            <div class="advisory-box" id="advisoryBox">
+              <div class="advisory-icon">💡</div>
+              <div class="advisory-content">
+                <div class="advisory-title">Operational Advisory</div>
+                <div class="advisory-text" id="advisoryText">Click "Execute Soft Computing Pipeline" to evaluate weather conditions.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Fuzzy Explainability Section -->
+    <section class="card explain-card" id="explainSection">
+      <div class="card-header">
+        <div>
+          <h2>Fuzzy Logic Explainability & Active Linguistic Rules</h2>
+          <p class="section-desc">Transparent Mamdani inference layer: why this risk level was assigned.</p>
+        </div>
+        <span class="badge-accent">Decision Transparency</span>
+      </div>
+
+      <div class="explain-grid">
+        <!-- Fired Rules List -->
+        <div class="explain-panel">
+          <h3 class="panel-subtitle">Activated Rule Set (Ranked by Firing Strength)</h3>
+          <div id="rulesList" class="rules-list">
+            <div class="placeholder-text">Run a prediction to inspect active fuzzy rules.</div>
+          </div>
+        </div>
+
+        <!-- Input Membership Breakdown -->
+        <div class="explain-panel">
+          <h3 class="panel-subtitle">Fuzzified Membership Breakdown</h3>
+          <div class="membership-group">
+            <span class="sub-label">Predicted Rainfall Degree:</span>
+            <div id="rainMemberships" class="membership-bars">
+              <div class="placeholder-text">Pending calculation</div>
+            </div>
+          </div>
+          <div class="membership-group" style="margin-top: 1rem;">
+            <span class="sub-label">Relative Humidity Degree:</span>
+            <div id="humidityMemberships" class="membership-bars">
+              <div class="placeholder-text">Pending calculation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Model Benchmark & Evaluation Section (Review II Academic Criteria) -->
+    <section class="card metrics-card">
+      <div class="card-header">
+        <div>
+          <h2>Model Evaluation & Baseline Benchmark</h2>
+          <p class="section-desc">Experimental regression results on 3,000 meteorological records (80/20 train/test split).</p>
+        </div>
+        <span class="badge-neutral">Academic Review Rubric</span>
+      </div>
+
+      <div class="metrics-grid" id="metricsContainer">
+        <!-- Loaded dynamically via /api/metrics -->
+        <div class="metric-box">
+          <div class="metric-title">ANN Mean Absolute Error (MAE)</div>
+          <div class="metric-value" id="annMae">-- mm</div>
+          <div class="metric-sub" id="maeImprovement">Baseline: -- mm</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">ANN Root Mean Squared Error (RMSE)</div>
+          <div class="metric-value" id="annRmse">-- mm</div>
+          <div class="metric-sub" id="rmseImprovement">Baseline: -- mm</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Goodness of Fit (R² Score)</div>
+          <div class="metric-value" id="annR2">--</div>
+          <div class="metric-sub">Regression quality vs Mean Predictor</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Error Reduction vs Baseline</div>
+          <div class="metric-value metric-success" id="overallImprovement">-- %</div>
+          <div class="metric-sub">Improvement over historical baseline</div>
+        </div>
+      </div>
+
+      <div class="architecture-specs">
+        <div class="spec-item"><strong>Model Architecture:</strong> Multi-Layer Perceptron (MLPRegressor)</div>
+        <div class="spec-item"><strong>Hidden Layer Topography:</strong> 3 Layers [64, 32, 16 neurons]</div>
+        <div class="spec-item"><strong>Activation:</strong> ReLU with Adam optimizer</div>
+        <div class="spec-item"><strong>Dataset Samples:</strong> 3,000 observations (2,400 train / 600 test)</div>
+      </div>
+    </section>
+
+    <!-- Simulation History Table -->
+    <section class="card history-card">
+      <div class="card-header">
+        <div>
+          <h2>Simulation History & Audit Log</h2>
+          <p class="section-desc">Persistent local records of simulation tests.</p>
+        </div>
+        <div class="history-actions">
+          <a href="/api/export-csv" class="btn-outline">📥 Export CSV</a>
+          <button type="button" class="btn-outline" onclick="clearHistoryLog()">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Temp</th>
+              <th>Humidity</th>
+              <th>Pressure</th>
+              <th>Wind</th>
+              <th>Prior Rain</th>
+              <th>Predicted Rain</th>
+              <th>Risk Score</th>
+              <th>Risk Category</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="9" class="placeholder-text">No simulations run yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Academic Footer -->
+    <footer class="footer">
+      <div>
+        <strong>SmartRain</strong>: Intelligent Rainfall Prediction & Risk Assessment using Soft Computing.
+      </div>
+      <div class="footer-refs">
+        References: Abu Saleh et al. (2024), Ruiz-Hurtado et al. (2024), India Meteorological Department.
+      </div>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
